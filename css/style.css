@@ -1,0 +1,188 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:regular,700,900);
+:root {
+  --orange: #fa621c;
+}
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+body {
+  font-family: "Roboto";
+  color: #bcbaba;
+  background-color: #000000;
+}
+img {
+  max-width: 100%;
+  height: auto;
+}
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.poco-wrapper {
+  margin-top: 20px;
+  position: relative;
+  height: 648px;
+  width: 310px;
+  overflow: hidden;
+  border-radius: 40px;
+  background-size: cover;
+}
+.poco-wrapper img {
+  position: relative;
+  z-index: 1;
+}
+.screen {
+  pointer-events: all;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: #000;
+  width: 100%;
+  height: 100%;
+  padding-top: 15px;
+}
+.app {
+  position: relative;
+  z-index: 100;
+  padding: 0 30px;
+}
+.app__navbar {
+  display: flex;
+  position: relative;
+  z-index: 100;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 2px;
+}
+#time {
+  font-size: 11px;
+  display: inline-block;
+  padding-right: 5px;
+}
+#battery {
+  background: url("https://img.icons8.com/ios/50/FFFFFF/empty-battery.png") no-repeat;
+  background-size: cover;
+  width: 21px;
+  position: relative;
+  height: 22px;
+}
+#battery::after {
+  content: attr(data-percentage);
+  position: absolute;
+  top: 50%;
+  text-align: center;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 9px;
+  color: #fff;
+  font-size: 7px;
+}
+
+.app__menu {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  justify-content: center;
+}
+.calculator,
+.apps,
+.exchange {
+  cursor: pointer;
+}
+.menu-item.active path {
+  fill: var(--orange);
+  stroke: var(--orange);
+}
+.menu-item:hover path {
+  fill: var(--orange);
+  stroke: var(--orange);
+}
+.app__result {
+  display: flex;
+  border-bottom: 1px solid #101010;
+  justify-content: flex-end;
+  flex-direction: column;
+  align-items: flex-end;
+  height: 280px;
+  gap: 2px;
+}
+#expression {
+  font-size: 40px;
+}
+#result {
+  font-size: 25px;
+  color: #303030;
+}
+.app__operations {
+  position: relative;
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  font-size: 18px;
+  align-items: center;
+  row-gap: 10px;
+  column-gap: 30px;
+}
+.app__operations div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+}
+.app__operations > div {
+  position: relative;
+  min-height: 40px;
+  min-width: 40px;
+  transition: all 0.3s ease;
+}
+.app__operations > div:not(:last-child):after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  background-color: #535353;
+  width: 35px;
+  height: 35px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -2;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.app__operations div:not(:last-child):hover::after {
+  opacity: 1;
+}
+.function {
+  color: var(--orange);
+  font-size: 28px;
+}
+.equals {
+  color: #fff;
+  border-radius: 50%;
+  position: relative;
+}
+.equals-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  width: 30px;
+  height: 30px;
+  background-color: var(--orange);
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+.equals:hover {
+  color: #858585;
+}
+.equals:hover .equals-circle {
+  background-color: #56240d;
+}
