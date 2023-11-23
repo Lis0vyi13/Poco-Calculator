@@ -90,9 +90,9 @@ img {
   gap: 50px;
   justify-content: center;
 }
-.calculator,
-.apps,
-.exchange {
+.calculator svg,
+.apps svg,
+.exchange svg {
   cursor: pointer;
 }
 .menu-item.active path {
@@ -118,6 +118,7 @@ img {
 #result {
   font-size: 25px;
   color: #303030;
+  margin-bottom: 10px;
 }
 .app__operations {
   position: relative;
@@ -178,11 +179,65 @@ img {
   height: 30px;
   background-color: var(--orange);
   border-radius: 50%;
-  transition: background-color 0.3s ease;
+  transition: all 0.1s ease;
 }
-.equals:hover {
-  color: #858585;
+.equals:active .equals-circle {
+  width: 25px;
+  height: 25px;
 }
-.equals:hover .equals-circle {
-  background-color: #56240d;
+
+.app__content {
+  display: flex;
+}
+.calculator__content {
+  margin-left: 0;
+  transition: margin-left 0.5s ease;
+  min-width: 100%;
+}
+
+.apps__content,
+.exchange__content {
+  display: grid;
+  max-width: 250px;
+  margin: 0 auto;
+  grid-template-columns: repeat(3, 1fr);
+  padding-top: 30px;
+  grid-auto-rows: min-content;
+  row-gap: 50px;
+  column-gap: 15px;
+  min-width: 100%;
+}
+.apps__content > div,
+.exchange__content > div {
+  display: flex;
+  justify-content: center;
+}
+.apps__content > div figure,
+.exchange__content > div figure {
+  display: inline-flex;
+  gap: 10px;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.apps__content > div figure:hover figcaption,
+.exchange__content > div figure:hover figcaption {
+  color: #8a8a8a;
+}
+.apps__content > div figure svg,
+.exchange__content > div figure svg {
+  transition: all 0.3s ease;
+}
+.apps__content > div figure:hover svg,
+.exchange__content > div figure:hover svg {
+  fill: #fff;
+  stroke: #fff;
+}
+.apps__content-tab figcaption,
+.exchange__content-tab figcaption {
+  transition: color 0.3s ease;
+  color: #535353;
+  font-size: 12px;
 }
