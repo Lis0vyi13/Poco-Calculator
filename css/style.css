@@ -185,7 +185,6 @@ img {
   width: 25px;
   height: 25px;
 }
-
 .app__content {
   display: flex;
 }
@@ -194,7 +193,6 @@ img {
   transition: margin-left 0.5s ease;
   min-width: 100%;
 }
-
 .apps__content,
 .exchange__content {
   display: grid;
@@ -233,6 +231,10 @@ img {
 .apps__content > div figure:hover svg,
 .exchange__content > div figure:hover svg {
   fill: #fff;
+  stroke: #fff;
+}
+.apps__content > div figure:hover svg .a,
+.exchange__content > div figure:hover svg .a {
   stroke: #fff;
 }
 .apps__content-tab figcaption,
