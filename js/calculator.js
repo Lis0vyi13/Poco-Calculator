@@ -13,28 +13,30 @@ function removeLastLetter() {
 }
 function updateExpression() {
   let tmpStr = expression.textContent.replace(/\s/g, "");
-  if (+setStringLength(tmpStr) < Number.MAX_SAFE_INTEGER) {
-    expression.textContent = (+setStringLength(tmpStr)).toLocaleString();
-  } else if (!tmpStr.includes(",")) {
+
+  if (+setStringLength(tmpStr) < Number.MAX_SAFE_INTEGER && !expression.textContent.includes(".")) {
+    expression.textContent = (+setStringLength(tmpStr)).toLocaleString().replace(".", ",");
+  } else if (!expression.textContent.includes(".") && !expression.textContent.includes(",")) {
     expression.textContent = BigInt(setStringLength(tmpStr)).toLocaleString();
   } else {
-    expression.textContent = setStringLength(tmpStr);
+    expression.textContent = setStringLength(tmpStr).replace(".", ",");
   }
 }
 function updateResult() {
-  const int = parseFloat(expression.textContent.replace(/\s/g, ""));
-
+  let tmp = expression.textContent.replace(",", ".");
+  tmp = tmp.replace(/\s/g, "");
+  let int = parseFloat(tmp);
   if (expression.textContent.length > 9) {
-    if (int < Number.MAX_SAFE_INTEGER) {
+    if (int < Number.MAX_SAFE_INTEGER && !tmp.includes(".")) {
       result.textContent = `= ${int.toExponential().toLocaleString()}`;
     } else {
-      result.textContent = `= ${int.toExponential()}`;
+      result.textContent = `= ${int.toExponential().replace(".", ",")}`;
     }
   } else {
-    if (int < Number.MAX_SAFE_INTEGER) {
+    if (int < Number.MAX_SAFE_INTEGER && !tmp.includes(".")) {
       result.textContent = `= ${int.toLocaleString()}`;
     } else {
-      result.textContent = `= ${int}`;
+      result.textContent = `= ${tmp.replace(".", ",")}`;
     }
   }
 }
@@ -69,10 +71,10 @@ function changeFontSize(str) {
 operations.forEach((op) => {
   op.addEventListener("click", function (e) {
     if (op.dataset.value === "%") {
-      expression.textContent = setStringLength(calculatePercentage(+expression.textContent));
+      let tmp = expression.textContent.replace(",", ".").replace(/\s/g, "");
+      expression.textContent = setStringLength(calculatePercentage(+tmp));
       changeFontSize(expression.textContent);
       updateExpression();
-
       updateResult();
     }
   });
@@ -88,6 +90,9 @@ numbers.forEach((num) => {
       result.textContent = `= ${(+removeLastLetter()).toLocaleString()}`;
       expression.textContent = setStringLength(expression.textContent);
       return;
+    }
+    if (expression.textContent === "NaN") {
+      expression.textContent = text;
     }
     if (expression.textContent === "0") {
       expression.textContent = text;
