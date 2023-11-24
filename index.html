@@ -104,8 +104,12 @@
             <div class="app__content">
               <section class="calculator__content">
                 <section class="app__result">
-                  <div id="expression">85</div>
-                  <div id="result">= 85</div>
+                  <div id="expression">0</div>
+                  <div
+                    hidden
+                    id="result">
+                    = 85
+                  </div>
                 </section>
                 <section class="app__operations">
                   <div
@@ -136,53 +140,46 @@
                   </div>
                   <div
                     style="font-size: 21px"
-                    class="percent function">
+                    data-value="%"
+                    class="percent operation">
                     %
                   </div>
                   <div
                     style="margin-top: -1.5px"
-                    class="divide function">
+                    data-value="/"
+                    class="divide operation">
                     ÷
                   </div>
-                  <div class="numbers">7</div>
-                  <div class="numbers">8</div>
-                  <div class="numbers">9</div>
-                  <div class="multiply function">×</div>
-                  <div class="numbers">4</div>
-                  <div class="numbers">5</div>
-                  <div class="numbers">6</div>
-                  <div class="subtraction function">-</div>
-                  <div class="numbers">1</div>
-                  <div class="numbers">2</div>
-                  <div class="numbers">3</div>
-                  <div class="addition function">+</div>
-                  <div class="modified-operations">
-                    <svg
-                      fill="#fa621c"
-                      width="17px"
-                      height="17px"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                      stroke="#fa621c"
-                      transform="matrix(1, 0, 0, 1, 0, 0)rotate(0)">
-                      <g
-                        id="SVGRepo_bgCarrier"
-                        stroke-width="0" />
-
-                      <g
-                        id="SVGRepo_tracerCarrier"
-                        stroke-linecap="round"
-                        stroke-linejoin="round" />
-
-                      <g id="SVGRepo_iconCarrier">
-                        <path
-                          d="M14.293,9.707a1,1,0,0,1,0-1.414L18.586,4H16a1,1,0,0,1,0-2h5a1,1,0,0,1,1,1V8a1,1,0,0,1-2,0V5.414L15.707,9.707a1,1,0,0,1-1.414,0ZM3,22H8a1,1,0,0,0,0-2H5.414l4.293-4.293a1,1,0,0,0-1.414-1.414L4,18.586V16a1,1,0,0,0-2,0v5A1,1,0,0,0,3,22Z" />
-                      </g>
-                    </svg>
+                  <div class="number">7</div>
+                  <div class="number">8</div>
+                  <div class="number">9</div>
+                  <div
+                    data-value="*"
+                    class="multiply operation">
+                    ×
                   </div>
-                  <div class="numbers">0</div>
-                  <div class="numbers">,</div>
-                  <div class="equals function">
+                  <div class="number">4</div>
+                  <div class="number">5</div>
+                  <div class="number">6</div>
+                  <div
+                    data-value="-"
+                    class="subtraction operation">
+                    -
+                  </div>
+                  <div class="number">1</div>
+                  <div class="number">2</div>
+                  <div class="number">3</div>
+                  <div
+                    data-value="+"
+                    class="addition operation">
+                    +
+                  </div>
+                  <div class="number">e</div>
+                  <div class="number">0</div>
+                  <div class="number">,</div>
+                  <div
+                    data-value="="
+                    class="equals operation">
                     <div class="equals-circle"></div>
                     =
                   </div>
@@ -286,7 +283,7 @@
         </section>
       </div>
     </div>
-    <script src="js/script.js"></script>
+    <script src="js/calculator.js"></script>
     <script src="js/navbar.js"></script>
     <script src="js/menu.js"></script>
   </body>
