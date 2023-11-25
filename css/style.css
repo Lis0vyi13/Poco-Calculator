@@ -1,6 +1,7 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:regular,700,900);
 :root {
   --orange: #fa621c;
+  --transition-sec: 0.3s;
 }
 
 * {
@@ -112,8 +113,10 @@ img {
   height: 280px;
   gap: 2px;
 }
-#expression {
+#expression,
+#result {
   white-space: wrap;
+  transition: all var(--transition-sec) ease;
   word-break: break-all;
   font-size: 2.5rem;
 }
@@ -121,6 +124,9 @@ img {
   font-size: 1.5625rem;
   color: #303030;
   margin-bottom: 10px;
+}
+#result.active {
+  color: #bcbaba;
 }
 .app__operations {
   position: relative;
