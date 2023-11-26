@@ -27,38 +27,79 @@ operations.forEach((op) => {
 
     if (op.dataset.value === "%") {
       let tmp = expression.textContent.replace(",", ".").replace(/\s/g, "");
-
-      expression.textContent = setStringLength(calculatePercentage(+tmp));
-      console.log(expression.textContent);
-
-      changeFontSize(expression.textContent);
-      updateExpression();
-      result.textContent = expression.textContent;
-      return;
+      if ((!stringHasOperators(tmp) || tmp.includes("e")) && tmp !== "0") {
+        expression.textContent = setStringLength(calculatePercentage(+tmp));
+        changeFontSize(expression.textContent);
+        updateExpression();
+        result.textContent = expression.textContent;
+        setResultLength(result);
+        return;
+      }
     }
     if (op.dataset.value === "=" && !result.hidden) {
+      const value = expression.textContent;
+      console.log(value);
       root.style.setProperty("--transition-sec", "0.3s");
       expression.style.fontSize = " 1.5625rem";
       result.style.fontSize = " 2.5rem";
       result.classList.add("active");
+      if (stringHasOperators(value) && !value.includes("e")) {
+        console.log(1);
+        const operatorsRegExp = /[×÷+-]/g;
+
+        const parts = value.replaceAll(",", ".").split(operatorsRegExp).join(" ").trim().split(" ");
+        const operators = value
+          .match(/[×÷+-]/g)
+          .join("")
+          .replaceAll("÷", "/")
+          .replaceAll("×", "*")
+          .split("");
+        result.textContent = `= ${calculate(parts, operators).toString().replaceAll(".", ",")}`;
+        setResultLength(result);
+      }
+
       setTimeout(() => {
         root.style.setProperty("--transition-sec", "none");
       }, 400);
     }
+    let lastValue = expression.textContent[expression.textContent.length - 1];
+
+    if (op.dataset.value === "/") {
+      handleDivideClick(op, lastValue);
+    }
+    if (op.dataset.value === "*") {
+      handleMultiplyClick(op, lastValue);
+    }
+    if (op.dataset.value === "-") {
+      handleSubtractionClick(op, lastValue);
+    }
+    if (op.dataset.value === "+") {
+      handleAdditionClick(op, lastValue);
+    }
+    changeResetButtonName();
   });
 });
 
 numbers.forEach((num) => {
   num.addEventListener("click", function (e) {
     if (result.classList.contains("active")) result.classList.remove("active");
-
     const text = num.textContent;
+
+    if (result.style.fontSize === "2.5rem") {
+      expression.textContent = text;
+      handleEqualOutClick();
+      return;
+    }
+    if (expression.textContent === "0" && text === "0") return;
     if (text === ",") {
       if (expression.textContent.includes(",") || expression.textContent.length >= 22) return;
       expression.textContent += text;
       result.hidden = false;
       result.textContent = `= ${(+removeLastLetter()).toLocaleString()}`;
+      setResultLength(result);
+
       expression.textContent = setStringLength(expression.textContent);
+      changeResetButtonName();
       return;
     }
     if (expression.textContent === "NaN") {
@@ -88,6 +129,7 @@ resetButton.addEventListener("click", function (e) {
     changeFontSize(expression.textContent);
   }
 });
+
 removeButton.addEventListener("click", function (e) {
   if (!result.classList.contains("active")) {
     if (expression.textContent !== "0") {
@@ -105,8 +147,93 @@ removeButton.addEventListener("click", function (e) {
   }
 });
 
+function calculate(args, operators) {
+  args = args.map(Number);
+  if (args.length === operators.length) {
+    operators.pop();
+  }
+  const stack = [];
+  let currValue = args[0];
+
+  for (let i = 0; i < operators.length; i++) {
+    if (operators[i] === "/" || operators[i] === "*") {
+      if (operators[i] === "/") {
+        currValue /= args[i + 1];
+      }
+      if (operators[i] === "*") {
+        currValue *= args[i + 1];
+      }
+    } else {
+      if (currValue <= 0.000000005) currValue = 0;
+      stack.push(currValue, operators[i]);
+      currValue = args[i + 1];
+    }
+  }
+  stack.push(currValue);
+  let result = stack[0];
+  for (let i = 1; i < stack.length; i += 2) {
+    if (stack[i] === "+") {
+      result += stack[i + 1];
+    }
+    if (stack[i] === "-") {
+      result -= stack[i + 1];
+    }
+  }
+  return result;
+}
+
+function handleDivideClick(operation, lastValue) {
+  if (lastValue != "÷") {
+    if (lastValue === "×" || lastValue === "+" || lastValue === "-" || lastValue === ",")
+      expression.textContent = expression.textContent.slice(0, expression.textContent.length - 1);
+    expression.textContent += operation.textContent.trim();
+    result.hidden = false;
+  }
+  handleEqualOutClick(operation);
+  changeFontSize(expression.textContent);
+}
+function handleMultiplyClick(operation, lastValue) {
+  if (lastValue != "×") {
+    if (lastValue === "÷" || lastValue === "+" || lastValue === "-" || lastValue === ",")
+      expression.textContent = expression.textContent.slice(0, expression.textContent.length - 1);
+    expression.textContent += operation.textContent.trim();
+    result.hidden = false;
+  }
+  handleEqualOutClick(operation);
+  changeFontSize(expression.textContent);
+}
+function handleSubtractionClick(operation, lastValue) {
+  if (lastValue != "-") {
+    if (lastValue === "×" || lastValue === "+" || lastValue === "÷" || lastValue === ",")
+      expression.textContent = expression.textContent.slice(0, expression.textContent.length - 1);
+    expression.textContent += operation.textContent.trim();
+    result.hidden = false;
+  }
+  handleEqualOutClick(operation);
+  changeFontSize(expression.textContent);
+}
+function handleAdditionClick(operation, lastValue) {
+  if (lastValue != "+") {
+    if (lastValue === "×" || lastValue === "÷" || lastValue === "-" || lastValue === ",")
+      expression.textContent = expression.textContent.slice(0, expression.textContent.length - 1);
+    expression.textContent += operation.textContent.trim();
+    result.hidden = false;
+  }
+  handleEqualOutClick(operation);
+  changeFontSize(expression.textContent);
+}
+function handleEqualOutClick(operation) {
+  if (result.style.fontSize === "2.5rem") {
+    result.style.fontSize = "1.5625rem";
+    expression.style.fontSize = "2.5rem";
+    if (operation) {
+      expression.textContent = result.textContent.slice(2) + operation.textContent.trim();
+    }
+  }
+}
 function changeResetButtonName() {
-  return (resetButton.textContent = result.hidden ? "AC" : "C");
+  return (resetButton.textContent =
+    expression.textContent.length > 1 || !result.hidden ? "C" : "AC");
 }
 function removeLastLetter() {
   return expression.textContent.slice(0, expression.textContent.length - 1);
@@ -114,7 +241,6 @@ function removeLastLetter() {
 function updateExpression() {
   let tmpStr = expression.textContent.replace(",", ".").replace(/\s/g, "");
   let integerNumber = setStringLength(tmpStr);
-  console.log(integerNumber);
   if (integerNumber.includes(".")) {
     expression.textContent = integerNumber.replace(".", ",");
   } else {
@@ -124,40 +250,61 @@ function updateExpression() {
         : (expression.textContent = integerNumber.toString());
   }
 }
+
 function updateResult() {
   let numberStr = expression.textContent.replace(",", ".").replace(/\s/g, "");
-  let resultText;
-  if (+numberStr === 0) {
-    result.textContent = "= 0";
-    return;
-  }
-  if (numberStr.includes(".")) {
-    let floatNumber = parseFloat(numberStr);
 
-    if (floatNumber < Number.MAX_SAFE_INTEGER && floatNumber > 0.001) {
-      resultText = `= ${floatNumber.toString().replace(".", ",")}`;
-    } else {
-      resultText = `= ${floatNumber.toExponential()}`;
+  if (!stringHasOperators(numberStr)) {
+    let resultText;
+    if (+numberStr === 0) {
+      result.textContent = "= 0";
+      return;
     }
-  } else if (numberStr.includes("e")) {
-    resultText = numberStr;
-  } else {
-    let integerNumber = BigInt(setStringLength(numberStr));
+    if (numberStr.includes(".")) {
+      let floatNumber = parseFloat(numberStr);
 
-    if (integerNumber <= Number.MAX_SAFE_INTEGER) {
-      resultText = `= ${integerNumber.toLocaleString()}`;
+      if (floatNumber < Number.MAX_SAFE_INTEGER && floatNumber > 0.001) {
+        resultText = `= ${floatNumber.toString().replace(".", ",")}`;
+      } else {
+        resultText = `= ${floatNumber.toExponential()}`;
+      }
+    } else if (numberStr.includes("e")) {
+      resultText = numberStr;
     } else {
-      resultText = `= ${integerNumber.toString()}`;
-    }
-  }
+      let integerNumber = BigInt(setStringLength(numberStr));
 
-  result.textContent = resultText;
+      if (integerNumber <= Number.MAX_SAFE_INTEGER) {
+        resultText = `= ${integerNumber.toLocaleString()}`;
+      } else {
+        resultText = `= ${integerNumber.toString()}`;
+      }
+    }
+
+    result.textContent = resultText;
+    setResultLength(result);
+  }
+}
+function stringHasOperators(str) {
+  const operationsArr = ["÷", "×", "-", "+"];
+  let hasOperators;
+  operationsArr.forEach(function (op) {
+    if (str.includes(op)) {
+      hasOperators = true;
+      return hasOperators;
+    }
+  });
+  return hasOperators;
 }
 function calculatePercentage(num) {
   return num / 100;
 }
 function setStringLength(str) {
   return str.length > 22 ? str.slice(0, 22) : str;
+}
+function setResultLength(result) {
+  return result.textContent.length > 12
+    ? (result.textContent = result.textContent.slice(0, 12))
+    : result.textContent;
 }
 function changeFontSize(str) {
   if (str.length <= 10) {
