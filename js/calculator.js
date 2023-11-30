@@ -32,7 +32,6 @@ operations.forEach((op) => {
         changeFontSize(expression.textContent);
         updateExpression();
         result.textContent = expression.textContent;
-        setResultLength(result);
         return;
       }
     }
@@ -44,18 +43,7 @@ operations.forEach((op) => {
       result.style.fontSize = " 2.5rem";
       result.classList.add("active");
       if (stringHasOperators(value) && !value.includes("e")) {
-        console.log(1);
-        const operatorsRegExp = /[×÷+-]/g;
-
-        const parts = value.replaceAll(",", ".").split(operatorsRegExp).join(" ").trim().split(" ");
-        const operators = value
-          .match(/[×÷+-]/g)
-          .join("")
-          .replaceAll("÷", "/")
-          .replaceAll("×", "*")
-          .split("");
-        result.textContent = `= ${calculate(parts, operators).toString().replaceAll(".", ",")}`;
-        setResultLength(result);
+        result.textContent = `= ${calculate(value).toString().replaceAll(".", ",")}`;
       }
 
       setTimeout(() => {
@@ -81,9 +69,19 @@ operations.forEach((op) => {
 });
 
 numbers.forEach((num) => {
+  const text = num.textContent;
+
   num.addEventListener("click", function (e) {
-    if (result.classList.contains("active")) result.classList.remove("active");
-    const text = num.textContent;
+    if (result.classList.contains("active")) {
+      result.classList.remove("active");
+      if (text === ",") {
+        expression.textContent = "0,";
+        result.textContent = `= 0`;
+        handleEqualOutClick();
+        return;
+      }
+      result.textContent = `= ${text}`;
+    }
 
     if (result.style.fontSize === "2.5rem") {
       expression.textContent = text;
@@ -92,13 +90,26 @@ numbers.forEach((num) => {
     }
     if (expression.textContent === "0" && text === "0") return;
     if (text === ",") {
-      if (expression.textContent.includes(",") || expression.textContent.length >= 22) return;
+      const operatorsRegExp = /[×÷+-]/g;
+
+      let args = expression.textContent
+        .replaceAll(",", ".")
+        .split(operatorsRegExp)
+        .join(" ")
+        .trim()
+        .split(" ");
+
+      if (args.at(-1).includes(".") || expression.textContent.length >= 22) return;
       expression.textContent += text;
       result.hidden = false;
       result.textContent = `= ${(+removeLastLetter()).toLocaleString()}`;
-      setResultLength(result);
 
       expression.textContent = setStringLength(expression.textContent);
+      if (stringHasOperators(expression.textContent)) {
+        result.textContent = `= ${calculate(expression.textContent)
+          .toString()
+          .replaceAll(".", ",")}`;
+      }
       changeResetButtonName();
       return;
     }
@@ -110,6 +121,9 @@ numbers.forEach((num) => {
       result.hidden = !result.hidden;
     } else {
       expression.textContent += text;
+    }
+    if (stringHasOperators(expression.textContent)) {
+      result.textContent = `= ${calculate(expression.textContent).toString().replaceAll(".", ",")}`;
     }
 
     changeResetButtonName();
@@ -147,7 +161,19 @@ removeButton.addEventListener("click", function (e) {
   }
 });
 
-function calculate(args, operators) {
+function calculate(value) {
+  if (value.endsWith(",")) value = value.slice(0, value.length - 1);
+  console.log(value);
+  const operatorsRegExp = /[×÷+-]/g;
+
+  let args = value.replaceAll(",", ".").split(operatorsRegExp).join(" ").trim().split(" ");
+  const operators = value
+    .match(/[×÷+-]/g)
+    .join("")
+    .replaceAll("÷", "/")
+    .replaceAll("×", "*")
+    .split("");
+
   args = args.map(Number);
   if (args.length === operators.length) {
     operators.pop();
@@ -281,7 +307,6 @@ function updateResult() {
     }
 
     result.textContent = resultText;
-    setResultLength(result);
   }
 }
 function stringHasOperators(str) {
@@ -301,11 +326,7 @@ function calculatePercentage(num) {
 function setStringLength(str) {
   return str.length > 22 ? str.slice(0, 22) : str;
 }
-function setResultLength(result) {
-  return result.textContent.length > 12
-    ? (result.textContent = result.textContent.slice(0, 12))
-    : result.textContent;
-}
+
 function changeFontSize(str) {
   if (str.length <= 10) {
     expression.style.fontSize = "2.5rem";

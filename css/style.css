@@ -253,3 +253,15 @@ img {
   color: #535353;
   font-size: 12px;
 }
+#logo {
+  height: 60px;
+  overflow: hidden;
+  position: relative;
+  cursor: auto;
+}
+#logo:hover::after {
+  opacity: 0;
+}
+#logo img {
+  scale: 1.7;
+}
