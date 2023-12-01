@@ -37,13 +37,15 @@ operations.forEach((op) => {
     }
     if (op.dataset.value === "=" && !result.hidden) {
       const value = expression.textContent;
-      console.log(value);
       root.style.setProperty("--transition-sec", "0.3s");
-      expression.style.fontSize = " 1.5625rem";
+      changeFontSize(expression.textContent);
       result.style.fontSize = " 2.5rem";
       result.classList.add("active");
       if (stringHasOperators(value) && !value.includes("e")) {
-        result.textContent = `= ${calculate(value).toString().replaceAll(".", ",")}`;
+        if (expression.textContent != "0÷0") {
+          result.textContent = `= ${calculate(value).toString().replaceAll(".", ",")}`;
+        }
+        result.textContent = "= Разделить на ноль нельзя";
       }
 
       setTimeout(() => {
@@ -99,11 +101,10 @@ numbers.forEach((num) => {
         .trim()
         .split(" ");
 
-      if (args.at(-1).includes(".") || expression.textContent.length >= 22) return;
+      if (args.at(-1).includes(".") || expression.textContent.length >= 20) return;
       expression.textContent += text;
       result.hidden = false;
       result.textContent = `= ${(+removeLastLetter()).toLocaleString()}`;
-
       expression.textContent = setStringLength(expression.textContent);
       if (stringHasOperators(expression.textContent)) {
         result.textContent = `= ${calculate(expression.textContent)
@@ -120,10 +121,16 @@ numbers.forEach((num) => {
       expression.textContent = text;
       result.hidden = !result.hidden;
     } else {
-      expression.textContent += text;
+      if (expression.textContent.length <= 20) expression.textContent += text;
     }
     if (stringHasOperators(expression.textContent)) {
-      result.textContent = `= ${calculate(expression.textContent).toString().replaceAll(".", ",")}`;
+      if (expression.textContent != "0÷0") {
+        result.textContent = `= ${calculate(expression.textContent)
+          .toString()
+          .replaceAll(".", ",")}`;
+      } else {
+        result.textContent = "= Разделить на ноль нельзя";
+      }
     }
 
     changeResetButtonName();
@@ -163,7 +170,6 @@ removeButton.addEventListener("click", function (e) {
 
 function calculate(value) {
   if (value.endsWith(",")) value = value.slice(0, value.length - 1);
-  console.log(value);
   const operatorsRegExp = /[×÷+-]/g;
 
   let args = value.replaceAll(",", ".").split(operatorsRegExp).join(" ").trim().split(" ");
@@ -196,16 +202,16 @@ function calculate(value) {
     }
   }
   stack.push(currValue);
-  let result = stack[0];
+  let total = stack[0];
   for (let i = 1; i < stack.length; i += 2) {
     if (stack[i] === "+") {
-      result += stack[i + 1];
+      total += stack[i + 1];
     }
     if (stack[i] === "-") {
-      result -= stack[i + 1];
+      total -= stack[i + 1];
     }
   }
-  return result;
+  return parseFloat(total.toFixed(10));
 }
 
 function handleDivideClick(operation, lastValue) {
@@ -324,7 +330,7 @@ function calculatePercentage(num) {
   return num / 100;
 }
 function setStringLength(str) {
-  return str.length > 22 ? str.slice(0, 22) : str;
+  return str.length > 20 ? str.slice(0, 20) : str;
 }
 
 function changeFontSize(str) {
