@@ -38,14 +38,15 @@ operations.forEach((op) => {
     if (op.dataset.value === "=" && !result.hidden) {
       const value = expression.textContent;
       root.style.setProperty("--transition-sec", "0.3s");
-      changeFontSize(expression.textContent);
-      result.style.fontSize = " 2.5rem";
+      expression.style.fontSize = "1.565rem";
+      changeResultFontSize(result);
       result.classList.add("active");
       if (stringHasOperators(value) && !value.includes("e")) {
-        if (expression.textContent != "0÷0") {
+        if (expression.textContent === "0÷0") {
+          result.textContent = "= Разделить на ноль нельзя";
+        } else {
           result.textContent = `= ${calculate(value).toString().replaceAll(".", ",")}`;
         }
-        result.textContent = "= Разделить на ноль нельзя";
       }
 
       setTimeout(() => {
@@ -164,12 +165,18 @@ removeButton.addEventListener("click", function (e) {
       changeFontSize(expression.textContent);
       updateExpression();
       updateResult();
+      if (stringHasOperators(expression.textContent))
+        result.textContent = `= ${calculate(expression.textContent)}`;
     }
   }
 });
 
 function calculate(value) {
-  if (value.endsWith(",")) value = value.slice(0, value.length - 1);
+  if (value.endsWith(",")) value = value.slice(0, -1);
+  if (/÷0[+\-÷×]/.test(value) || value.endsWith("÷0")) {
+    console.log(/÷0[+-÷×]/.test(value));
+    return "Разделить на ноль нельзя";
+  }
   const operatorsRegExp = /[×÷+-]/g;
 
   let args = value.replaceAll(",", ".").split(operatorsRegExp).join(" ").trim().split(" ");
@@ -179,7 +186,6 @@ function calculate(value) {
     .replaceAll("÷", "/")
     .replaceAll("×", "*")
     .split("");
-
   args = args.map(Number);
   if (args.length === operators.length) {
     operators.pop();
@@ -211,7 +217,9 @@ function calculate(value) {
       total -= stack[i + 1];
     }
   }
-  return parseFloat(total.toFixed(10));
+  const result = parseFloat(total.toFixed(10));
+
+  return isNaN(result) ? "Разделить на ноль нельзя" : parseFloat(total.toFixed(10));
 }
 
 function handleDivideClick(operation, lastValue) {
@@ -268,7 +276,7 @@ function changeResetButtonName() {
     expression.textContent.length > 1 || !result.hidden ? "C" : "AC");
 }
 function removeLastLetter() {
-  return expression.textContent.slice(0, expression.textContent.length - 1);
+  return expression.textContent.slice(0, -1);
 }
 function updateExpression() {
   let tmpStr = expression.textContent.replace(",", ".").replace(/\s/g, "");
@@ -353,5 +361,23 @@ function changeFontSize(str) {
   if (str.length > 17) {
     expression.style.fontSize = "1.2rem";
     result.style.fontSize = "1rem";
+  }
+}
+
+function changeResultFontSize(result) {
+  if (result.textContent.length <= 10) {
+    result.style.fontSize = "2.5rem";
+  }
+  if (result.textContent.length > 10) {
+    result.style.fontSize = "2rem";
+  }
+  if (result.textContent.length > 12) {
+    result.style.fontSize = "1.75rem";
+  }
+  if (result.textContent.length > 15) {
+    result.style.fontSize = "1.55rem";
+  }
+  if (result.textContent.length > 17) {
+    result.style.fontSize = "1.15rem";
   }
 }
