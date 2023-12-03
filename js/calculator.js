@@ -6,68 +6,63 @@ const resetButton = document.querySelector(".reset");
 const removeButton = document.querySelector(".remove");
 const functions = document.querySelectorAll(".function");
 const root = document.documentElement;
-functions.forEach((func) => {
-  func.onselectstart = function () {
+const numbersArr = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+const operationsArr = ["/", "Backspace", "*", "+", "-", "%", "Enter", "Escape"];
+
+[...functions, ...operations, ...numbers].forEach((el) => {
+  el.onselectstart = function () {
     return false;
   };
 });
-operations.forEach((op) => {
-  op.onselectstart = function () {
-    return false;
-  };
-});
-numbers.forEach((num) => {
-  num.onselectstart = function () {
-    return false;
-  };
-});
+
 operations.forEach((op) => {
   op.addEventListener("click", function (e) {
-    if (result.classList.contains("active")) result.classList.remove("active");
+    operationHandle(op);
+  });
+});
 
-    if (op.dataset.value === "%") {
-      let tmp = expression.textContent.replace(",", ".").replace(/\s/g, "");
-      if ((!stringHasOperators(tmp) || tmp.includes("e")) && tmp !== "0") {
-        expression.textContent = setStringLength(calculatePercentage(+tmp));
-        changeFontSize(expression.textContent);
-        updateExpression();
-        result.textContent = expression.textContent;
+numbersArr.forEach(function (num) {
+  document.addEventListener("keydown", function (e) {
+    if (e.key === num) {
+      handleInput(num);
+    }
+  });
+});
+operationsArr.forEach(function (op) {
+  document.addEventListener("keydown", function (e) {
+    if (e.key === op) {
+      if (op === "Backspace" && e.shiftKey) {
         return;
       }
-    }
-    if (op.dataset.value === "=" && !result.hidden) {
-      const value = expression.textContent;
-      root.style.setProperty("--transition-sec", "0.3s");
-      expression.style.fontSize = "1.565rem";
-      changeResultFontSize(result);
-      result.classList.add("active");
-      if (stringHasOperators(value) && !value.includes("e")) {
-        if (expression.textContent === "0÷0") {
-          result.textContent = "= Разделить на ноль нельзя";
-        } else {
-          result.textContent = `= ${calculate(value).toString().replaceAll(".", ",")}`;
-        }
+      switch (op) {
+        case "/":
+          handleDivideClick("÷");
+          break;
+        case "Backspace":
+          removeHandler();
+          break;
+        case "*":
+          handleMultiplyClick("×");
+          break;
+        case "+":
+          handleAdditionClick("+");
+          break;
+        case "-":
+          handleSubtractionClick("-");
+          break;
+        case "%":
+          expression.textContent = calculatePercentage(expression.textContent);
+          break;
+        case "Enter":
+          onEqualClick();
+          break;
+        case "Escape":
+          resetHandler();
+          break;
+        default:
+          break;
       }
-
-      setTimeout(() => {
-        root.style.setProperty("--transition-sec", "none");
-      }, 400);
     }
-    let lastValue = expression.textContent[expression.textContent.length - 1];
-
-    if (op.dataset.value === "/") {
-      handleDivideClick(op, lastValue);
-    }
-    if (op.dataset.value === "*") {
-      handleMultiplyClick(op, lastValue);
-    }
-    if (op.dataset.value === "-") {
-      handleSubtractionClick(op, lastValue);
-    }
-    if (op.dataset.value === "+") {
-      handleAdditionClick(op, lastValue);
-    }
-    changeResetButtonName();
   });
 });
 
@@ -75,111 +70,32 @@ numbers.forEach((num) => {
   const text = num.textContent;
 
   num.addEventListener("click", function (e) {
-    if (result.classList.contains("active")) {
-      result.classList.remove("active");
-      if (text === ",") {
-        expression.textContent = "0,";
-        result.textContent = `= 0`;
-        handleEqualOutClick();
-        return;
-      }
-      result.textContent = `= ${text}`;
-    }
-
-    if (result.style.fontSize === "2.5rem") {
-      expression.textContent = text;
-      handleEqualOutClick();
-      return;
-    }
-    if (expression.textContent === "0" && text === "0") return;
-    if (text === ",") {
-      const operatorsRegExp = /[×÷+-]/g;
-
-      let args = expression.textContent
-        .replaceAll(",", ".")
-        .split(operatorsRegExp)
-        .join(" ")
-        .trim()
-        .split(" ");
-
-      if (args.at(-1).includes(".") || expression.textContent.length >= 20) return;
-      expression.textContent += text;
-      result.hidden = false;
-      result.textContent = `= ${(+removeLastLetter()).toLocaleString()}`;
-      expression.textContent = setStringLength(expression.textContent);
-      if (stringHasOperators(expression.textContent)) {
-        result.textContent = `= ${calculate(expression.textContent)
-          .toString()
-          .replaceAll(".", ",")}`;
-      }
-      changeResetButtonName();
-      return;
-    }
-    if (expression.textContent === "NaN") {
-      expression.textContent = text;
-    }
-    if (expression.textContent === "0") {
-      expression.textContent = text;
-      result.hidden = !result.hidden;
-    } else {
-      if (expression.textContent.length <= 20) expression.textContent += text;
-    }
-    if (stringHasOperators(expression.textContent)) {
-      if (expression.textContent != "0÷0") {
-        result.textContent = `= ${calculate(expression.textContent)
-          .toString()
-          .replaceAll(".", ",")}`;
-      } else {
-        result.textContent = "= Разделить на ноль нельзя";
-      }
-    }
-
-    changeResetButtonName();
-    updateExpression();
-    updateResult();
-    changeFontSize(expression.textContent);
+    handleInput(text);
   });
 });
 
 resetButton.addEventListener("click", function (e) {
-  if (resetButton.textContent === "C") {
-    root.style.setProperty("--transition-sec", "none");
-    expression.textContent = "0";
-    result.textContent = "0";
-    result.hidden = !result.hidden;
-    changeResetButtonName();
-    changeFontSize(expression.textContent);
-  }
+  resetHandler();
 });
 
 removeButton.addEventListener("click", function (e) {
-  if (!result.classList.contains("active")) {
-    if (expression.textContent !== "0") {
-      if (expression.textContent.length === 1) {
-        expression.textContent = "0";
-        result.hidden = !result.hidden;
-        changeResetButtonName();
-        return;
-      }
-      expression.textContent = removeLastLetter();
-      changeFontSize(expression.textContent);
-      updateExpression();
-      updateResult();
-      if (stringHasOperators(expression.textContent))
-        result.textContent = `= ${calculate(expression.textContent)}`;
-    }
-  }
+  removeHandler();
 });
 
 function calculate(value) {
   if (value.endsWith(",")) value = value.slice(0, -1);
   if (/÷0[+\-÷×]/.test(value) || value.endsWith("÷0")) {
-    console.log(/÷0[+-÷×]/.test(value));
     return "Разделить на ноль нельзя";
   }
   const operatorsRegExp = /[×÷+-]/g;
 
-  let args = value.replaceAll(",", ".").split(operatorsRegExp).join(" ").trim().split(" ");
+  let args = value
+    .replace(/\s/g, "")
+    .replaceAll(",", ".")
+    .split(operatorsRegExp)
+    .join(" ")
+    .trim()
+    .split(" ");
   const operators = value
     .match(/[×÷+-]/g)
     .join("")
@@ -224,50 +140,225 @@ function calculate(value) {
     : parseFloat(total.toFixed(10));
 }
 
-function handleDivideClick(operation, lastValue) {
+function operationHandle(op) {
+  if (result.classList.contains("active")) result.classList.remove("active");
+
+  if (op.dataset.value === "%") {
+    let tmp = expression.textContent.replace(",", ".").replace(/\s/g, "");
+    if ((!stringHasOperators(tmp) || tmp.includes("e")) && tmp !== "0") {
+      expression.textContent = setStringLength(calculatePercentage(+tmp));
+      changeFontSize(expression.textContent);
+      updateExpression();
+      result.textContent = expression.textContent;
+      return;
+    }
+  }
+  if (op.dataset.value === "=" && !result.hidden) {
+    onEqualClick();
+  }
+
+  if (op.dataset.value === "/") {
+    handleDivideClick(op);
+  }
+  if (op.dataset.value === "*") {
+    handleMultiplyClick(op);
+  }
+  if (op.dataset.value === "-") {
+    handleSubtractionClick(op);
+  }
+  if (op.dataset.value === "+") {
+    handleAdditionClick(op);
+  }
+}
+function handleInput(text) {
+  const operatorsRegExp = /[×÷+-]/g;
+
+  if (result.classList.contains("active")) {
+    if (text === ",") {
+      expression.textContent = "0,";
+      result.textContent = `= 0`;
+      handleEqualOutClick();
+      result.classList.remove("active");
+      changeResetButtonName();
+      return;
+    }
+    result.textContent = `= ${text}`;
+    expression.textContent = text;
+    handleEqualOutClick();
+    result.classList.remove("active");
+    changeResetButtonName();
+    return;
+  }
+
+  if (expression.textContent === "0" && text === "0") return;
+  if (text === ",") {
+    const operatorsRegExp = /[×÷+-]/g;
+
+    let args = expression.textContent
+      .replaceAll(",", ".")
+      .split(operatorsRegExp)
+      .join(" ")
+      .trim()
+      .split(" ");
+
+    if (args.at(-1).includes(".") || expression.textContent.length >= 20) return;
+    expression.textContent += text;
+    result.hidden = false;
+    result.textContent = `= ${(+removeLastLetter()).toLocaleString()}`;
+    expression.textContent = setStringLength(expression.textContent);
+    if (stringHasOperators(expression.textContent)) {
+      result.textContent = `= ${calculate(expression.textContent).toString().replaceAll(".", ",")}`;
+    }
+    changeResetButtonName();
+    return;
+  }
+  if (expression.textContent === "NaN") {
+    expression.textContent = text;
+  }
+  if (expression.textContent === "0") {
+    expression.textContent = text;
+    result.hidden = !result.hidden;
+  } else {
+    if (expression.textContent.length <= 20) {
+      const args = expression.textContent
+        .replace(/\s/g, "")
+        .replaceAll(",", ".")
+        .split(operatorsRegExp)
+        .join(" ")
+        .trim()
+        .split(" ");
+      const lastNum = args.at(-1);
+      if (
+        lastNum.length === 1 &&
+        lastNum[0] == "0" &&
+        !/[.\+\-÷×]/.test(text) &&
+        !/[.\+\-÷×]/.test(expression.textContent.slice(-1))
+      ) {
+        return;
+      }
+      if (lastNum.length > 1 && lastNum[0] == "0" && lastNum[1] != ".") {
+        return;
+      }
+      expression.textContent += text;
+    }
+  }
+  if (stringHasOperators(expression.textContent)) {
+    if (expression.textContent != "0÷0") {
+      result.textContent = `= ${calculate(expression.textContent).toString().replaceAll(".", ",")}`;
+    } else {
+      result.textContent = "= Разделить на ноль нельзя";
+    }
+  }
+  changeResetButtonName();
+  updateExpression();
+  updateResult();
+  changeFontSize(expression.textContent);
+}
+function onEqualClick() {
+  const value = expression.textContent;
+  root.style.setProperty("--transition-sec", "0.3s");
+  expression.style.fontSize = "1.565rem";
+  changeResultFontSize(result);
+  result.classList.add("active");
+  if (stringHasOperators(value) && !value.includes("e")) {
+    if (expression.textContent === "0÷0") {
+      result.textContent = "= Разделить на ноль нельзя";
+    } else {
+      result.textContent = `= ${calculate(value).toString().replaceAll(".", ",")}`;
+    }
+  }
+
+  setTimeout(() => {
+    root.style.setProperty("--transition-sec", "none");
+  }, 400);
+}
+
+function resetHandler() {
+  if (resetButton.textContent === "C") {
+    root.style.setProperty("--transition-sec", "none");
+    expression.textContent = "0";
+    result.textContent = "0";
+    result.hidden = !result.hidden;
+    changeResetButtonName();
+    changeFontSize(expression.textContent);
+  }
+}
+function removeHandler() {
+  if (!result.classList.contains("active")) {
+    if (expression.textContent !== "0") {
+      if (expression.textContent.length === 1) {
+        expression.textContent = "0";
+        result.hidden = !result.hidden;
+        changeResetButtonName();
+        return;
+      }
+      expression.textContent = removeLastLetter();
+      changeFontSize(expression.textContent);
+      updateExpression();
+      updateResult();
+      if (stringHasOperators(expression.textContent))
+        result.textContent = `= ${calculate(expression.textContent)}`;
+    }
+  }
+}
+function handleDivideClick(operation) {
+  let lastValue = expression.textContent[expression.textContent.length - 1];
   if (lastValue != "÷") {
     if (lastValue === "×" || lastValue === "+" || lastValue === "-" || lastValue === ",")
       expression.textContent = expression.textContent.slice(0, expression.textContent.length - 1);
-    expression.textContent += operation.textContent.trim();
+    expression.textContent +=
+      typeof operation === "string" ? operation : operation.textContent.trim();
     result.hidden = false;
   }
   handleEqualOutClick(operation);
   changeFontSize(expression.textContent);
+  changeResetButtonName();
 }
-function handleMultiplyClick(operation, lastValue) {
+function handleMultiplyClick(operation) {
+  let lastValue = expression.textContent[expression.textContent.length - 1];
   if (lastValue != "×") {
     if (lastValue === "÷" || lastValue === "+" || lastValue === "-" || lastValue === ",")
       expression.textContent = expression.textContent.slice(0, expression.textContent.length - 1);
-    expression.textContent += operation.textContent.trim();
+    expression.textContent +=
+      typeof operation === "string" ? operation : operation.textContent.trim();
     result.hidden = false;
   }
   handleEqualOutClick(operation);
   changeFontSize(expression.textContent);
+  changeResetButtonName();
 }
-function handleSubtractionClick(operation, lastValue) {
+function handleSubtractionClick(operation) {
+  let lastValue = expression.textContent[expression.textContent.length - 1];
   if (lastValue != "-") {
     if (lastValue === "×" || lastValue === "+" || lastValue === "÷" || lastValue === ",")
       expression.textContent = expression.textContent.slice(0, expression.textContent.length - 1);
-    expression.textContent += operation.textContent.trim();
+    expression.textContent +=
+      typeof operation === "string" ? operation : operation.textContent.trim();
     result.hidden = false;
   }
   handleEqualOutClick(operation);
   changeFontSize(expression.textContent);
+  changeResetButtonName();
 }
-function handleAdditionClick(operation, lastValue) {
+function handleAdditionClick(operation) {
+  let lastValue = expression.textContent[expression.textContent.length - 1];
   if (lastValue != "+") {
     if (lastValue === "×" || lastValue === "÷" || lastValue === "-" || lastValue === ",")
       expression.textContent = expression.textContent.slice(0, expression.textContent.length - 1);
-    expression.textContent += operation.textContent.trim();
+    expression.textContent +=
+      typeof operation === "string" ? operation : operation.textContent.trim();
     result.hidden = false;
   }
   handleEqualOutClick(operation);
   changeFontSize(expression.textContent);
+  changeResetButtonName();
 }
 function handleEqualOutClick(operation) {
-  if (result.style.fontSize === "2.5rem") {
+  if (result.classList.contains("active")) {
     result.style.fontSize = "1.5625rem";
     expression.style.fontSize = "2.5rem";
+    result.hidden = false;
+
     if (operation) {
       expression.textContent = result.textContent.slice(2) + operation.textContent.trim();
     }
@@ -275,7 +366,11 @@ function handleEqualOutClick(operation) {
 }
 function changeResetButtonName() {
   return (resetButton.textContent =
-    expression.textContent.length > 1 || !result.hidden ? "C" : "AC");
+    expression.textContent.length > 1 ||
+    (expression.textContent.length === 1 && expression.textContent != "0") ||
+    !result.hidden
+      ? "C"
+      : "AC");
 }
 function removeLastLetter() {
   return expression.textContent.slice(0, -1);
@@ -337,6 +432,10 @@ function stringHasOperators(str) {
   return hasOperators;
 }
 function calculatePercentage(num) {
+  if (typeof num === "string") {
+    if (/[+\-÷×]/.test(num.slice(-1))) return num;
+  }
+
   return num / 100;
 }
 function setStringLength(str) {
