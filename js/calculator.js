@@ -219,7 +219,9 @@ function calculate(value) {
   }
   const result = parseFloat(total.toFixed(10));
 
-  return isNaN(result) ? "Разделить на ноль нельзя" : parseFloat(total.toFixed(10));
+  return isNaN(result) || !isFinite(result)
+    ? "Разделить на ноль нельзя"
+    : parseFloat(total.toFixed(10));
 }
 
 function handleDivideClick(operation, lastValue) {
