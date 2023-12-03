@@ -1,3 +1,5 @@
+import { applications } from "./menu.js";
+
 const numbers = document.querySelectorAll(".number");
 const operations = document.querySelectorAll(".operation");
 const expression = document.querySelector("#expression");
@@ -5,16 +7,40 @@ const result = document.querySelector("#result");
 const resetButton = document.querySelector(".reset");
 const removeButton = document.querySelector(".remove");
 const functions = document.querySelectorAll(".function");
+const expressionWrapper = document.querySelector(".expression-wrapper");
 const root = document.documentElement;
-const numbersArr = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+const numbersArr = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ","];
 const operationsArr = ["/", "Backspace", "*", "+", "-", "%", "Enter", "Escape"];
-
-[...functions, ...operations, ...numbers].forEach((el) => {
-  el.onselectstart = function () {
-    return false;
-  };
+[
+  ...functions,
+  ...operations,
+  ...numbers,
+  ...applications,
+  document.querySelector("#mockup"),
+].forEach((el) => {
+  el.style.userSelect = "none";
+});
+document.querySelector("#mockup").addEventListener("touchstart", function (e) {
+  e.preventDefault();
+});
+document.querySelector("#mockup").addEventListener("contextmenu", function (e) {
+  e.preventDefault();
 });
 
+const longPressDuration = 300;
+
+let longPressTimer;
+
+expressionWrapper.addEventListener("mousedown", function (e) {
+  longPressTimer = setTimeout(() => {
+    navigator.clipboard.writeText(expression.textContent);
+    showNotification("Copied to clipboard");
+  }, longPressDuration);
+});
+
+expressionWrapper.addEventListener("mouseup", function () {
+  clearTimeout(longPressTimer);
+});
 operations.forEach((op) => {
   op.addEventListener("click", function (e) {
     operationHandle(op);
@@ -51,7 +77,7 @@ operationsArr.forEach(function (op) {
           handleSubtractionClick("-");
           break;
         case "%":
-          expression.textContent = calculatePercentage(expression.textContent);
+          onPercentClick();
           break;
         case "Enter":
           onEqualClick();
@@ -85,7 +111,7 @@ removeButton.addEventListener("click", function (e) {
 function calculate(value) {
   if (value.endsWith(",")) value = value.slice(0, -1);
   if (/÷0[+\-÷×]/.test(value) || value.endsWith("÷0")) {
-    return "Разделить на ноль нельзя";
+    return "You can't divide by zero";
   }
   const operatorsRegExp = /[×÷+-]/g;
 
@@ -136,7 +162,7 @@ function calculate(value) {
   const result = parseFloat(total.toFixed(10));
 
   return isNaN(result) || !isFinite(result)
-    ? "Разделить на ноль нельзя"
+    ? "You can't divide by zero"
     : parseFloat(total.toFixed(10));
 }
 
@@ -144,14 +170,7 @@ function operationHandle(op) {
   if (result.classList.contains("active")) result.classList.remove("active");
 
   if (op.dataset.value === "%") {
-    let tmp = expression.textContent.replace(",", ".").replace(/\s/g, "");
-    if ((!stringHasOperators(tmp) || tmp.includes("e")) && tmp !== "0") {
-      expression.textContent = setStringLength(calculatePercentage(+tmp));
-      changeFontSize(expression.textContent);
-      updateExpression();
-      result.textContent = expression.textContent;
-      return;
-    }
+    onPercentClick();
   }
   if (op.dataset.value === "=" && !result.hidden) {
     onEqualClick();
@@ -246,13 +265,23 @@ function handleInput(text) {
     if (expression.textContent != "0÷0") {
       result.textContent = `= ${calculate(expression.textContent).toString().replaceAll(".", ",")}`;
     } else {
-      result.textContent = "= Разделить на ноль нельзя";
+      result.textContent = "= You can't divide by zero";
     }
   }
   changeResetButtonName();
   updateExpression();
   updateResult();
   changeFontSize(expression.textContent);
+}
+function onPercentClick() {
+  let tmp = expression.textContent.replace(",", ".").replace(/\s/g, "");
+  if ((!stringHasOperators(tmp) || tmp.includes("e")) && tmp !== "0") {
+    expression.textContent = setStringLength(calculatePercentage(+tmp));
+    changeFontSize(expression.textContent);
+    updateExpression();
+    result.textContent = `= ${expression.textContent}`;
+    return;
+  }
 }
 function onEqualClick() {
   const value = expression.textContent;
@@ -262,7 +291,7 @@ function onEqualClick() {
   result.classList.add("active");
   if (stringHasOperators(value) && !value.includes("e")) {
     if (expression.textContent === "0÷0") {
-      result.textContent = "= Разделить на ноль нельзя";
+      result.textContent = "= You can't divide by zero";
     } else {
       result.textContent = `= ${calculate(value).toString().replaceAll(".", ",")}`;
     }
@@ -355,7 +384,7 @@ function handleAdditionClick(operation) {
 }
 function handleEqualOutClick(operation) {
   if (result.classList.contains("active")) {
-    result.style.fontSize = "1.5625rem";
+    result.style.fontSize = "1.4rem";
     expression.style.fontSize = "2.5rem";
     result.hidden = false;
 
@@ -445,7 +474,7 @@ function setStringLength(str) {
 function changeFontSize(str) {
   if (str.length <= 10) {
     expression.style.fontSize = "2.5rem";
-    result.style.fontSize = "1.5625rem";
+    result.style.fontSize = "1.4rem";
   }
   if (str.length > 10) {
     expression.style.fontSize = "2rem";
@@ -481,4 +510,15 @@ function changeResultFontSize(result) {
   if (result.textContent.length > 17) {
     result.style.fontSize = "1.15rem";
   }
+}
+function showNotification(message) {
+  const notification = document.createElement("div");
+  notification.classList.add("notification");
+  notification.textContent = message;
+
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.remove();
+  }, 2000);
 }

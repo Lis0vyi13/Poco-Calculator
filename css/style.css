@@ -41,6 +41,7 @@ img {
   pointer-events: all;
   position: absolute;
   left: 0;
+
   top: 0;
   background-color: #000;
   width: 100%;
@@ -96,6 +97,7 @@ img {
 .exchange svg {
   cursor: pointer;
 }
+
 .menu-item.active path {
   fill: var(--orange);
   stroke: var(--orange);
@@ -113,6 +115,18 @@ img {
   height: 280px;
   gap: 2px;
 }
+.expression-wrapper {
+  text-align: right;
+  width: 100%;
+  touch-action: manipulation;
+  user-select: none;
+  cursor: pointer;
+}
+
+.expression-wrapper:active {
+  background-color: #101010;
+}
+
 #expression,
 #result {
   white-space: wrap;
@@ -252,6 +266,7 @@ img {
   transition: color 0.3s ease;
   color: #535353;
   font-size: 12px;
+  user-select: none;
 }
 #logo {
   height: 60px;
@@ -264,4 +279,45 @@ img {
 }
 #logo img {
   scale: 1.7;
+}
+.app.active {
+  position: relative;
+  background-color: #fff;
+}
+.notification {
+  color: #fff;
+  background-color: #000;
+  font-size: 14px;
+  border: 1px solid var(--orange);
+  position: fixed;
+  top: 80%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--orange);
+  border-radius: 7px;
+  padding: 5px;
+  animation: slideIn 0.5s ease-in-out forwards, fadeOut 0.5s 1s ease-in-out forwards;
+}
+@keyframes slideIn {
+  from {
+    opacity: 0;
+
+    transform: translateX(-50%) translateY(100%);
+  }
+  to {
+    opacity: 1;
+
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    transform: translateX(-50%);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
 }
