@@ -11,36 +11,7 @@ const expressionWrapper = document.querySelector(".expression-wrapper");
 const root = document.documentElement;
 const numbersArr = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ","];
 const operationsArr = ["/", "Backspace", "*", "+", "-", "%", "Enter", "Escape"];
-[
-  ...functions,
-  ...operations,
-  ...numbers,
-  ...applications,
-  document.querySelector("#mockup"),
-].forEach((el) => {
-  el.style.userSelect = "none";
-});
-document.querySelector("#mockup").addEventListener("touchstart", function (e) {
-  e.preventDefault();
-});
-document.querySelector("#mockup").addEventListener("contextmenu", function (e) {
-  e.preventDefault();
-});
 
-const longPressDuration = 300;
-
-let longPressTimer;
-
-expressionWrapper.addEventListener("mousedown", function (e) {
-  longPressTimer = setTimeout(() => {
-    navigator.clipboard.writeText(expression.textContent);
-    showNotification("Copied to clipboard");
-  }, longPressDuration);
-});
-
-expressionWrapper.addEventListener("mouseup", function () {
-  clearTimeout(longPressTimer);
-});
 operations.forEach((op) => {
   op.addEventListener("click", function (e) {
     operationHandle(op);
@@ -521,4 +492,55 @@ function showNotification(message) {
   setTimeout(() => {
     notification.remove();
   }, 2000);
+}
+// Reset events
+[
+  ...functions,
+  ...operations,
+  ...numbers,
+  ...applications,
+  document.querySelector("#mockup"),
+].forEach((el) => {
+  el.style.userSelect = "none";
+});
+document.querySelector("#mockup").addEventListener("touchstart", function (e) {
+  e.preventDefault();
+});
+document.querySelector("#mockup").addEventListener("contextmenu", function (e) {
+  e.preventDefault();
+});
+
+// Copy to clipboard
+const longPressDuration = 300;
+let longPressTimer;
+
+expressionWrapper.addEventListener("mousedown", handleMouseDown);
+expressionWrapper.addEventListener("mouseup", handleMouseUp);
+expressionWrapper.addEventListener("touchstart", handleMouseDown);
+
+function handleMouseDown() {
+  longPressTimer = setTimeout(() => {
+    showNotification("Copied to clipboard");
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(expression.textContent);
+    } else {
+      copyToClipboard(expression.textContent);
+    }
+  }, longPressDuration);
+}
+
+function handleMouseUp() {
+  clearTimeout(longPressTimer);
+}
+function copyToClipboard(text) {
+  const input = document.createElement("input");
+
+  document.body.appendChild(input);
+  input.value = text;
+
+  input.select();
+  input.setSelectionRange(0, 99999);
+  document.execCommand("copy");
+
+  document.body.removeChild(input);
 }
