@@ -1660,15 +1660,26 @@ class datePicker {
     }
 
     const daysUntilBirthday = Math.floor((nextBirthday - today) / (1000 * 60 * 60 * 24));
-
     const monthsUntilBirthday = Math.floor(daysUntilBirthday / 30);
 
     const nextMonthBirthday = new Date(today);
     nextMonthBirthday.setMonth(nextMonthBirthday.getMonth() + monthsUntilBirthday);
 
-    const accurateMonthsUntilBirthday =
+    let accurateMonthsUntilBirthday =
       monthsUntilBirthday + (nextBirthday.getMonth() - nextMonthBirthday.getMonth());
-    const accurateDaysUntilBirthday = nextBirthday.getDate() - today.getDate();
+
+    const dayOfNextBirthday = nextBirthday.getDate();
+    const dayOfToday = today.getDate();
+    const daysInCurrentMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+
+    let accurateDaysUntilBirthday;
+
+    if (dayOfToday > dayOfNextBirthday) {
+      accurateMonthsUntilBirthday--;
+      accurateDaysUntilBirthday = daysInCurrentMonth - dayOfToday + dayOfNextBirthday;
+    } else {
+      accurateDaysUntilBirthday = dayOfNextBirthday - dayOfToday;
+    }
 
     const dayOfWeekOptions = { weekday: "long" };
     const dayOfWeek = new Intl.DateTimeFormat("en-US", dayOfWeekOptions).format(nextBirthday);
@@ -1914,7 +1925,7 @@ var air_datepicker_default = /*#__PURE__*/__webpack_require__.n(air_datepicker);
 const renderApp_navbar = document.querySelector(".app__navbar");
 const appMenu = document.querySelector(".app__menu");
 const appContent = document.querySelector(".app__content");
-const isFirstTime = true;
+let isFirstTime = true;
 let activeApp;
 
 applications.forEach(function (application) {
