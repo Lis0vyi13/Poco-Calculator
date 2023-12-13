@@ -2072,7 +2072,10 @@ function createApplicationContent(className) {
 /* harmony default export */ const lisovyi_logo_orange = (__webpack_require__.p + "images/lisovyi-logo-orange.png");
 ;// CONCATENATED MODULE: ./src/images/mockup_poco.png
 /* harmony default export */ const mockup_poco = (__webpack_require__.p + "images/mockup_poco.png");
+;// CONCATENATED MODULE: ./src/images/lisovyi-favicon.png
+/* harmony default export */ const lisovyi_favicon = (__webpack_require__.p + "images/lisovyi-favicon.png");
 ;// CONCATENATED MODULE: ./src/js/index.js
+
 
 
 
