@@ -1577,6 +1577,10 @@ class datePicker {
       container: container,
       locale: en/* default */.Z,
       classes: "datepicker-modification",
+      startDate:
+        (localStorage.getItem("active-input") === "birthday"
+          ? localStorage.getItem("birthdayDate")
+          : localStorage.getItem("todayDate")) || "",
       position({ $datepicker, $target, $pointer, done }) {
         $datepicker.style.left = "50%";
         $datepicker.style.transform = "translateX(-50%)";
@@ -1586,6 +1590,7 @@ class datePicker {
 
         $datepicker.style.opacity = "0";
         $datepicker.style.transition = "opacity 0.3s ease-out, transform 0.3s ease-out";
+        localStorage.setItem("active-input", $target.id);
 
         $datepicker.offsetHeight;
 
@@ -1599,7 +1604,6 @@ class datePicker {
           }, 150);
         };
       },
-
       onSelect: ({ date, formattedDate, datepicker }) => {
         if (elem) {
           if (datepicker.$el.id === "birthday" && new Date() > new Date(date)) {
@@ -1754,10 +1758,17 @@ class datePicker {
 
 const dp = new datePicker();
 
-
 // EXTERNAL MODULE: ./src/js/components/navbar.js
 var navbar = __webpack_require__(38);
 ;// CONCATENATED MODULE: ./src/js/components/apps/age.js
+function formatDateToMMDDYYYY(date) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${month}/${day}/${year}`;
+}
+
 const ageHTML = `
 <main
   class="app__age"
@@ -1788,7 +1799,7 @@ const ageHTML = `
         cursor: pointer;
       "readonly
       id="today"
-      value="12/10/2023" />
+      value="${formatDateToMMDDYYYY(new Date())}" />
   </div>
   <div class="app__age-info">
     <div class="app__age-info-wrapper">
@@ -1948,25 +1959,35 @@ function render(className) {
   switch (className) {
     case "Age":
       wrapper.innerHTML += createApplicationContent(ageHTML);
+
       activeApp = "Age";
       setTimeout(() => {
-        new index_es("#birthday", dp.getDatepickerAgeConfig("#age"));
-        new index_es("#today", dp.getDatepickerAgeConfig("#age"));
+        let datepicker1 = new index_es("#birthday", dp.getDatepickerAgeConfig("#age"));
+        let datepicker2 = new index_es("#today", dp.getDatepickerAgeConfig("#age"));
         dp.updateData();
-        if (isFirstTime) {
+
+        if (!localStorage.getItem("isFirstTime")) {
           localStorage.setItem(
             "birthdayDate",
             "Tue Mar 16 2004 00:00:00 GMT+0200 (Восточная Европа, стандартное время)"
           );
           localStorage.setItem("birthday", "03/16/2004");
-          localStorage.setItem(
-            "todayDate",
-            "Sun Dec 10 2023 00:00:00 GMT+0200 (Восточная Европа, стандартное время)"
-          );
+          localStorage.setItem("todayDate", new Date(new Date()));
           localStorage.setItem("today", "12/10/2023");
         }
-        isFirstTime = false;
+        if (document.querySelector("#birthday")) {
+          document.querySelector("#birthday").addEventListener("click", function (e) {
+            datepicker1.selectDate(localStorage.getItem("birthdayDate"));
+          });
+        }
+        if (document.querySelector("#today")) {
+          document.querySelector("#today").addEventListener("click", function (e) {
+            datepicker2.selectDate(localStorage.getItem("todayDate"));
+          });
+        }
+        localStorage.setItem("isFirstTime", "false");
       }, 0);
+
       break;
     case "Currency":
       activeApp = "Currency";
