@@ -26,6 +26,7 @@
     "air-datepicker": "^3.4.0",
     "date-fns": "^2.30.0",
     "decimal.js": "^10.4.3",
-    "nice-select2": "^2.1.0"
+    "nice-select2": "^2.1.0",
+    "translate": "^2.0.2"
   }
 }
